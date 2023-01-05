@@ -1,0 +1,76 @@
+id: flatpak.mangohud.goverlay
+runtime: org.freedesktop.Platform
+runtime-version: '22.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.freepascal
+#command: start_goverlay
+finish-args:
+  - --allow=devel
+  - --allow=multiarch
+  - --share=network
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --device=all
+  - --filesystem=xdg-download
+  - --system-talk-name=org.freedesktop.UDisks2
+  - --env=PATH=/app/bin:/app/utils/bin:/usr/bin:/usr/lib/extensions/vulkan/MangoHud/bin/:/usr/bin:/usr/lib/extensions/vulkan/OBSVkCapture/bin/
+ 
+
+modules:
+  #- name: MangoHud
+  # build-options:
+  #   arch:
+  #     x86_64: *x86_64-build-options
+  #   config-opts:
+  #     - -Dmangoapp=true
+  # buildsystem: meson
+  # config-opts: &mangohud-config-opts
+  #   - -Duse_system_vulkan=enabled
+  #   - -Dvulkan_datadir=/usr/share
+  #   - -Dwith_xnvctrl=enabled
+  #   - -Dappend_libdir_mangohud=false
+  #   - -Dmangoapp_layer=true
+  # sources: &mangohud-sources
+  #   - type: archive
+  #     url: https://github.com/flightlessmango/MangoHud/releases/download/v0.6.8/MangoHud-v0.6.8-Source.tar.xz
+  #     sha256: 9c64ccab1a72ba1dc61cb88d2fbcce1d343fc6b6cdf22c2cc2859bfb2da66fd4
+  #     x-checker-data:
+  #       type: json
+  #       url: https://api.github.com/repos/flightlessmango/MangoHud/releases
+  #       url-query: |
+  #         map(select(.tag_name | startswith("v"))) | first |
+  #         .assets | map((select(.name | endswith("Source.tar.xz")))) | first | .browser_download_url
+  #       version-query: |
+  #         map(select(.tag_name | startswith("v"))) | first |
+  #         .tag_name | sub("^[vV]"; "")
+  #- name: mangohud
+  #  buildsystem: meson
+  #  build-commands:
+  #  - 
+  #  sources:
+  #    - type: archive
+  #      url: https://github.com/flightlessmango/MangoHud/releases/download/v0.6.8/MangoHud-v0.6.8-Source.tar.xz
+  #      sha256: 9c64ccab1a72ba1dc61cb88d2fbcce1d343fc6b6cdf22c2cc2859bfb2da66fd4
+  #
+
+  - name: qt5pas
+    config-opts:
+      - -after
+      - target.path=/app/lib
+    buildsystem: qmake
+    sources:
+      - type: shell
+        commands:
+          - cp -r /usr/lib/sdk/freepascal/share/lazarus/lcl/interfaces/qt5/cbindings/.
+            .
+
+  - name: start_goverlay
+    buildsystem: simple
+    build-commands:
+    - install -D start_goverlay.sh /app/bin/start_goverlay.sh
+    sources:
+      - type: file
+        path: start_goverlay.sh
